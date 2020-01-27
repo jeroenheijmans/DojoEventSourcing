@@ -1,20 +1,31 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EventFlow.Aggregates.ExecutionResults;
 using EventFlow.Commands;
 using Infi.DojoEventSourcing.Domain.Reservations.ValueObjects;
+using LanguageExt;
 
 namespace Infi.DojoEventSourcing.Domain.Reservations.Commands
 {
-    public class MakeReservationHandler : CommandHandler<Reservation, ReservationId, MakeReservation>
+    public class MakeReservationHandler : CommandHandler<Reservation, ReservationId, IExecutionResult, MakeReservation>
     {
-        public override Task ExecuteAsync(
+        public override Task<IExecutionResult> ExecuteCommandAsync(
             Reservation reservation,
             MakeReservation command,
             CancellationToken cancellationToken)
         {
-            reservation.Create(command.Number);
-
-            return Task.FromResult(0); // FIXME ED Magic number
+            try
+            {
+                reservation.UpdateContactInformation(command.Name, command.Email);
+                reservation.MakeReservation(command.Arrival, command.Departure);
+                return ExecutionResult.Success().AsTask();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ExecutionResult.Failed().AsTask();
+            }
         }
     }
 }

@@ -5,13 +5,13 @@ using Infi.DojoEventSourcing.Domain.Hotels;
 using Infi.DojoEventSourcing.Domain.Pricings;
 using Infi.DojoEventSourcing.Domain.Reservations.Events;
 using Infi.DojoEventSourcing.Domain.Reservations.ValueObjects;
+using Infi.DojoEventSourcing.Domain.Rooms;
 
 namespace Infi.DojoEventSourcing.Domain.Reservations
 {
     public class Reservation
         : AggregateRoot<Reservation, ReservationId>,
-            IEmit<ReservationPlaced>,
-            IApply<ReservationPlaced>
+          IEmit<ReservationCreated>
     {
         private static readonly TimeSpan PriceValidityDuration = TimeSpan.FromMinutes(30);
 
@@ -32,29 +32,19 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
         {
         }
 
-        public void Place()
-        {
-            Emit(new ReservationPlaced());
-        }
-
-        public void Apply(ReservationPlaced aggregateEvent)
-        {
-        }
-
-
-        public void SearchForAccommodation(DateTime arrival, DateTime departure, IPricingEngine pricing, Clock clock)
+        public void SearchForAccommodation(DateTime arrival, DateTime departure, IPricingEngine pricing)
         {
             Emit(new SearchedForAccommodation(Id, arrival, departure));
 
             for (var date = arrival; date < departure; date = date.AddDays(1))
             {
-                MakePriceOffer(date, pricing, clock);
+                MakePriceOffer(date, pricing);
             }
         }
 
-        private void MakePriceOffer(DateTime date, IPricingEngine pricing, Clock clock)
+        private void MakePriceOffer(DateTime date, IPricingEngine pricing)
         {
-            if (HasValidPriceOffer(date, clock))
+            if (HasValidPriceOffer(date))
             {
                 return;
             }
@@ -63,33 +53,37 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
                 .GetAccommodationPrice(date)
                 .IfSome(price =>
                 {
-                    var expires = clock.instant().plus(PriceValidityDuration);
+                    var expires = DateTime.UtcNow + PriceValidityDuration;
                     Emit(new PriceOffered(Id, date, price, expires));
                 });
         }
 
-        private bool HasValidPriceOffer(DateTime date, Clock clock) =>
-            priceOffersByDate.ContainsKey(date) && priceOffersByDate[date].IsStillValid(clock);
+        private bool HasValidPriceOffer(DateTime date) =>
+            priceOffersByDate.ContainsKey(date) && priceOffersByDate[date].IsStillValid();
 
         public void UpdateContactInformation(string name, string email)
         {
             Emit(new ContactInformationUpdated(Id, name, email));
         }
 
-        public void MakeReservation(DateTime arrival, DateTime departure, Clock clock)
+        public void MakeReservation(DateTime arrival, DateTime departure)
         {
             CheckStateIs(State.Prospective);
-            Emit(new ReservationCreated(Id, arrival, departure, Hotel.CheckInTime(arrival),
-                Hotel.CheckOutTime(departure)));
+            Emit(new ReservationCreated(
+                Id,
+                arrival,
+                departure,
+                Hotel.CreateCheckInTimeFromDate(arrival),
+                Hotel.CreateCheckOutTimeFromDate(departure)));
 
             for (var date = arrival; date < departure; date = date.AddDays(1))
             {
-                var offer = GetValidPriceOffer(date, clock);
+                var offer = GetValidPriceOffer(date);
                 Emit(new LineItemCreated(Id, _lineItems + 1, offer.Date, offer.Price));
             }
         }
 
-        private PriceOffered GetValidPriceOffer(DateTime date, Clock clock)
+        private PriceOffered GetValidPriceOffer(DateTime date)
         {
             if (!priceOffersByDate.ContainsKey(date))
             {
@@ -97,7 +91,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
             }
 
             var offer = priceOffersByDate[date];
-            if (offer.HasExpired(clock))
+            if (offer.HasExpired())
             {
                 throw new ArgumentException("price offer for date " + date + " has expired");
             }
@@ -105,7 +99,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
             return offer;
         }
 
-        public void AssignRoom(Guid roomId, string roomNumber)
+        public void AssignRoom(Room.RoomIdentity roomId, string roomNumber)
         {
             CheckStateIs(State.Reserved);
             Emit(new RoomAssigned(Id, roomId, roomNumber));
@@ -117,6 +111,11 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
             {
                 throw new ArgumentException("unexpected state: " + _state);
             }
+        }
+
+        public void Apply(ReservationCreated aggregateEvent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

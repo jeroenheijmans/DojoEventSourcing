@@ -9,7 +9,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Events
     [EventVersion("PriceOffered", 1)]
     public class PriceOffered : AggregateEvent<Reservation, ReservationId>
     {
-        public PriceOffered(Guid reservationId, DateTime date, Money price, DateTime expires)
+        public PriceOffered(ReservationId reservationId, DateTime date, Money price, DateTime expires)
         {
             ReservationId = reservationId;
             Date = date;
@@ -17,7 +17,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Events
             Expires = expires;
         }
 
-        public Guid ReservationId { get; }
+        public ReservationId ReservationId { get; }
         public DateTime Date { get; }
         public Money Price { get; }
         public DateTime Expires { get; }
@@ -26,8 +26,8 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Events
             (Date.Equals(arrival) || Date > arrival)
             && Date < departure;
 
-        public bool HasExpired(Clock clock) => !IsStillValid(clock);
+        public bool HasExpired() => !IsStillValid();
 
-        public bool IsStillValid(Clock clock) => Expires > clock.instant();
+        public bool IsStillValid() => Expires > DateTime.UtcNow;
     }
 }
