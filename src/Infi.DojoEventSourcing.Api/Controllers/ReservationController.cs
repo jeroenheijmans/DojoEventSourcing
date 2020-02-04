@@ -32,7 +32,7 @@ namespace DojoEventSourcing.Controllers
             return Json(allReservations);
         }
 
-        [HttpPost("PlaceReservation")]
+        [HttpPost]
         public async Task<IActionResult> PlaceReservation()
         {
             var reservationId = ReservationId.New;
@@ -40,7 +40,7 @@ namespace DojoEventSourcing.Controllers
                     reservationId,
                     "name",
                     "email@example.com",
-                    DateTime.Today, 
+                    DateTime.Today,
                     DateTime.Today.AddDays(2)),
                 CancellationToken.None);
 
