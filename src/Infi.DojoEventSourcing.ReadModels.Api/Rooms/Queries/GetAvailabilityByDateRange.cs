@@ -26,6 +26,7 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Rooms.Queries
         : IQueryHandler<GetAvailabilityByDateRange, IReadOnlyList<RoomAvailabilityDto>>
     {
         private readonly IDatabaseContext<IApiReadModelRepositoryFactory> _dbReadContext;
+        private IReadOnlyList<RoomOccupationReadModel> _roomOccupations;
 
         public GetAvailabilityByDateRangeHandler(IDatabaseContext<IApiReadModelRepositoryFactory> dbReadContext)
         {
@@ -37,71 +38,66 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Rooms.Queries
             CancellationToken cancellationToken)
         {
             var rooms = await GetAllRooms();
-            var roomOccupations = await GetAllRoomOccupationsFor(query);
+            _roomOccupations = await GetAllRoomOccupationsFor(query);
 
-            var roomAvailabilities = new List<RoomAvailabilityDto>();
+            return rooms.Map(room => GetAvailabilityForRoom(query, room)).ToImmutableList();
+        }
 
-            foreach (var room in rooms)
+        private RoomAvailabilityDto GetAvailabilityForRoom(GetAvailabilityByDateRange query, RoomReadModel room)
+        {
+            var occupiedIntervalsForRoom = _roomOccupations
+                .Where(o => o.AggregateId == room.AggregateId)
+                .Map(occupation => new RoomAvailabilityIntervalDto
+                {
+                    Start = occupation.StartDate,
+                    End = occupation.EndDate,
+                    IsOccupied = true,
+                })
+                .ToImmutableList();
+
+            var roomAvailabilityIntervals = GetAvailabilityIntervalsForQuery(query, occupiedIntervalsForRoom);
+
+            return new RoomAvailabilityDto
             {
-                var roomAvailability = new RoomAvailabilityDto
+                RoomId = new Guid(room.AggregateId),
+                RoomNumber = room.RoomNumber,
+                Details = roomAvailabilityIntervals.OrderBy(r => r.Start).ToList(),
+                IsAvailable = roomAvailabilityIntervals.Count == 1 && !roomAvailabilityIntervals.Single().IsOccupied,
+            };
+        }
+
+        private static List<RoomAvailabilityIntervalDto> GetAvailabilityIntervalsForQuery(
+            GetAvailabilityByDateRange query,
+            ImmutableList<RoomAvailabilityIntervalDto> occupiedIntervalsForRoom)
+        {
+            var roomAvailabilityIntervals = new List<RoomAvailabilityIntervalDto>(occupiedIntervalsForRoom);
+            var previousEnd = query.StartDateUtc;
+            foreach (var occupiedInterval in occupiedIntervalsForRoom)
+            {
+                if (previousEnd < occupiedInterval.Start)
                 {
-                    RoomId = new Guid(room.AggregateId),
-                    RoomNumber = room.RoomNumber,
-                };
-
-                var occupationsForRoom = roomOccupations
-                    .Where(o => o.AggregateId == room.AggregateId)
-                    .ToImmutableList();
-
-                var occupiedIntervals = new List<RoomAvailabilityIntervalDto>();
-                foreach (var roomOccupation in occupationsForRoom)
-                {
-                    occupiedIntervals.Add(new RoomAvailabilityIntervalDto
-                    {
-                        Start = roomOccupation.StartDate,
-                        End = roomOccupation.EndDate,
-                        IsOccupied = true,
-                    });
-                }
-
-                var roomAvailabilityIntervals = new List<RoomAvailabilityIntervalDto>(occupiedIntervals);
-                var previousEnd = query.StartDateUtc;
-                foreach (var occupiedInterval in occupiedIntervals)
-                {
-                    if (previousEnd < occupiedInterval.Start)
-                    {
-                        roomAvailabilityIntervals.Add(new RoomAvailabilityIntervalDto
-                        {
-                            Start = previousEnd,
-                            End = occupiedInterval.Start,
-                            IsOccupied = false,
-                        });
-                    }
-
-                    previousEnd = occupiedInterval.End;
-                }
-
-                if (previousEnd < query.EndDateUtc)
-                {
-                    // there is a gap after the last interval
                     roomAvailabilityIntervals.Add(new RoomAvailabilityIntervalDto
                     {
                         Start = previousEnd,
-                        End = query.EndDateUtc,
-                        IsOccupied = false
+                        End = occupiedInterval.Start,
+                        IsOccupied = false,
                     });
                 }
 
-                roomAvailability.Details = roomAvailabilityIntervals.OrderBy(r => r.Start).ToList();
-
-                roomAvailability.IsAvailable =
-                    roomAvailability.Details.Count == 1
-                    && !roomAvailability.Details.Single().IsOccupied;
-
-                roomAvailabilities.Add(roomAvailability);
+                previousEnd = occupiedInterval.End;
             }
 
-            return roomAvailabilities;
+            if (previousEnd < query.EndDateUtc)
+            {
+                roomAvailabilityIntervals.Add(new RoomAvailabilityIntervalDto
+                {
+                    Start = previousEnd,
+                    End = query.EndDateUtc,
+                    IsOccupied = false
+                });
+            }
+
+            return roomAvailabilityIntervals;
         }
 
         private async Task<IReadOnlyList<RoomOccupationReadModel>> GetAllRoomOccupationsFor(
