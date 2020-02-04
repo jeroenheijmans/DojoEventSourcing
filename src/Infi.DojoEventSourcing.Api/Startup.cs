@@ -11,6 +11,7 @@ using EventStore.ClientAPI;
 using Infi.DojoEventSourcing.Configuration;
 using Infi.DojoEventSourcing.Db;
 using Infi.DojoEventSourcing.Domain.EventSubscribers.Reservations;
+using Infi.DojoEventSourcing.Domain.Pricings;
 using Infi.DojoEventSourcing.Domain.Reservations.Commands;
 using Infi.DojoEventSourcing.Domain.Reservations.Events;
 using Infi.DojoEventSourcing.ReadModels.Api;
@@ -70,6 +71,7 @@ namespace DojoEventSourcing
 
             var databaseReadContext = ApiReadContextFactory.Create(apiReadModelConnectionString);
             services.AddScoped<IDatabaseContext<IApiReadModelRepositoryFactory>>(_ => databaseReadContext);
+            services.AddScoped<IPricingEngine, RandomPricingEngine>(); // FIXME ED Use InMemoryPricingEngine
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
