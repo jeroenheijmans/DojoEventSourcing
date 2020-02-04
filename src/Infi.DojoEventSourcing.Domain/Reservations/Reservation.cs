@@ -11,7 +11,8 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
 {
     public class Reservation
         : AggregateRoot<Reservation, ReservationId>,
-          IEmit<ReservationCreated>
+          IEmit<ReservationCreated>,
+          IEmit<ContactInformationUpdated>
     {
         private static readonly TimeSpan PriceValidityDuration = TimeSpan.FromMinutes(30);
 
@@ -115,7 +116,12 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
 
         public void Apply(ReservationCreated aggregateEvent)
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
+        }
+
+        public void Apply(ContactInformationUpdated aggregateEvent)
+        {
+            // throw new NotImplementedException();
         }
     }
 }
