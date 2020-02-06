@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventFlow.Queries;
+using Infi.DojoEventSourcing.Db;
 
 namespace Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries
 {
@@ -23,11 +24,11 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries
 
     public class GetCapacityByTimeRangeHandler : IQueryHandler<GetCapacityByTimeRange, CapacityDto[]>
     {
-        private readonly IReservationReadRepository _reservationRepository;
+        private readonly IDatabaseContext<IApiReadModelRepositoryFactory> _dbReadContext;
 
-        public GetCapacityByTimeRangeHandler(IReservationReadRepository reservationRepository)
+        public GetCapacityByTimeRangeHandler(IDatabaseContext<IApiReadModelRepositoryFactory> dbReadContext)
         {
-            _reservationRepository = reservationRepository;
+            _dbReadContext = dbReadContext;
         }
 
         public Task<CapacityDto[]> ExecuteQueryAsync(
@@ -37,7 +38,11 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries
 
         private async Task<CapacityDto[]> GetCapacityByDateRange(DateTime arrival, DateTime departure)
         {
-            var reservations = await _reservationRepository.GetByRange(arrival, departure).ConfigureAwait(false);
+            var reservations =
+                await _dbReadContext.RunAsync(f =>
+                        f.CreateReservationRepository()
+                            .GetByRange(arrival, departure))
+                    .ConfigureAwait(false);
 
             var dateToReservationCountLookup =
                 reservations
