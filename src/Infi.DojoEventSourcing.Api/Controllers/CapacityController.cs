@@ -1,6 +1,9 @@
 using System;
-using EventFlow;
+using System.Threading;
+using System.Threading.Tasks;
 using EventFlow.Queries;
+using Infi.DojoEventSourcing.ReadModels.Api.Reservations;
+using Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DojoEventSourcing.Controllers
@@ -9,30 +12,22 @@ namespace DojoEventSourcing.Controllers
     public class CapacityController : Controller
     {
         private readonly IQueryProcessor _queryProcessor;
-        private readonly ICommandBus _commandBus;
 
-        public CapacityController(ICommandBus commandBus, IQueryProcessor queryProcessor)
+        public CapacityController(IQueryProcessor queryProcessor)
         {
-            _commandBus = commandBus;
             _queryProcessor = queryProcessor;
         }
 
         [HttpGet("{date}")]
-        public CapacityDto GetByDate(DateTime date)
-        {
-            // return (CapacityDto)core.handle(new GetCapacityByDate(LocalDate.parse(date)));
-            return new CapacityDto();
-        }
+        public async Task<CapacityDto> GetByDate(DateTime date) =>
+            await _queryProcessor
+                .ProcessAsync(new GetCapacityByDate(date), CancellationToken.None)
+                .ConfigureAwait(false);
 
-        [HttpGet("{start}/{end}")]
-        public CapacityDto[] GetByDateRange(DateTime start, DateTime end)
-        {
-            // return (CapacityDto[])core.handle(new GetCapacityByDateRange(LocalDate.parse(start), LocalDate.parse(end)));
-            return new CapacityDto[] { };
-        }
-
-        public class CapacityDto
-        {
-        }
+        [HttpGet("{arrival}/{departure}")]
+        public async Task<CapacityDto[]> GetByDateRange(DateTime arrival, DateTime departure) =>
+            await _queryProcessor
+                .ProcessAsync(new GetCapacityByTimeRange(arrival, departure), CancellationToken.None)
+                .ConfigureAwait(false);
     }
 }

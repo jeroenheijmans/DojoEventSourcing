@@ -11,8 +11,4 @@
       <PackageReference Include="NodaMoney" Version="1.0.5" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Capacity\Queries" />
-    </ItemGroup>
-
 </Project>
