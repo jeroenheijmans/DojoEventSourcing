@@ -10,15 +10,15 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries
 {
     public class GetCapacityByTimeRange : IQuery<CapacityDto[]>
     {
-        public GetCapacityByTimeRange(DateTime start, DateTime end)
+        public GetCapacityByTimeRange(DateTime arrival, DateTime departure)
         {
-            Start = start;
-            End = end;
+            Arrival = arrival;
+            Departure = departure;
         }
 
-        public DateTime End { get; }
+        public DateTime Departure { get; }
 
-        public DateTime Start { get; }
+        public DateTime Arrival { get; }
     }
 
     public class GetCapacityByTimeRangeHandler : IQueryHandler<GetCapacityByTimeRange, CapacityDto[]>
@@ -33,7 +33,7 @@ namespace Infi.DojoEventSourcing.ReadModels.Api.Reservations.Queries
         public Task<CapacityDto[]> ExecuteQueryAsync(
             GetCapacityByTimeRange query,
             CancellationToken cancellationToken) =>
-            GetCapacityByDateRange(query.Start, query.End);
+            GetCapacityByDateRange(query.Arrival, query.Departure);
 
         private async Task<CapacityDto[]> GetCapacityByDateRange(DateTime arrival, DateTime departure)
         {
