@@ -30,8 +30,8 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Sagas
         {
             Publish(new OccupyAnyAvailableRoom(
                 Room.RoomIdentity.New, // TODO ED Reconsider this: only providing it, b/c EventFlow forces me to
-                domainEvent.AggregateEvent.CreateCheckInTimeFromDate,
-                domainEvent.AggregateEvent.CreateCheckOutTimeFromDate));
+                domainEvent.AggregateEvent.CheckInTime,
+                domainEvent.AggregateEvent.CheckOutTime));
 
             _reservationId = domainEvent.AggregateEvent.Id; // TODO ED Any other way to retrieve ReservationId in Apply?
 

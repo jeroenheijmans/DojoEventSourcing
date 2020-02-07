@@ -32,8 +32,8 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Queries
             AggregateId = domainEvent.AggregateIdentity.GetGuid().ToString();
             Arrival = domainEvent.AggregateEvent.Arrival;
             Departure = domainEvent.AggregateEvent.Departure;
-            CheckInTime = domainEvent.AggregateEvent.CreateCheckInTimeFromDate;
-            CheckOutTime = domainEvent.AggregateEvent.CreateCheckOutTimeFromDate;
+            CheckInTime = domainEvent.AggregateEvent.CheckInTime;
+            CheckOutTime = domainEvent.AggregateEvent.CheckOutTime;
             Status = "initiated";
         }
 

@@ -116,8 +116,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
 
         public void Apply(ReservationCreated aggregateEvent)
         {
-            // FIXME Implement
-            // throw new NotImplementedException();
+            _state = State.Reserved;
         }
 
         public void Apply(ContactInformationUpdated aggregateEvent)
@@ -139,7 +138,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations
 
         public void Apply(LineItemCreated aggregateEvent)
         {
-            // FIXME Implement
+            _lineItems++;
         }
     }
 }
