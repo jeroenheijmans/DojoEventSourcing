@@ -18,7 +18,6 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Queries
         public string Email { get; private set; }
         public string Name { get; private set; }
         public string Status { get; set; }
-        public string RoomNumber { get; set; }
         public string RoomId { get; set; }
         public DateTime CheckOutTime { get; set; }
         public DateTime CheckInTime { get; set; }
@@ -47,7 +46,6 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Queries
         public void Apply(IReadModelContext context, IDomainEvent<Reservation, ReservationId, RoomAssigned> domainEvent)
         {
             RoomId = domainEvent.AggregateEvent.RoomId.Value;
-            RoomNumber = domainEvent.AggregateEvent.RoomNumber;
         }
     }
 }
