@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 
 namespace DojoEventSourcing
 {
@@ -31,10 +33,18 @@ namespace DojoEventSourcing
     {
         private static readonly IConfigurationRoot Configuration = ConfigurationFactory.Create();
 
+        private const string DefaultLogOutputFormat =
+            "[{Timestamp:o} {Level:u3}] {ThreadId} {Message:lj} {Properties}{NewLine}{Exception}";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.Console(LogEventLevel.Verbose, DefaultLogOutputFormat)
+                .CreateLogger();
+
             var apiReadModelConnectionString = Configuration["ApiReadModel:ConnectionString"];
 
             services.AddControllers();
@@ -74,8 +84,8 @@ namespace DojoEventSourcing
                         .UseSQLiteReadModel<RoomOccupationReadModel>()
                         .AddQueryHandlers(typeof(GetAllReservationsHandler).Assembly)
                         .AddSagaLocators(typeof(ReservationSagaLocator))
-                        .AddSagas(typeof(ReservationSaga));
-                    // .UseLibLog(LibLogProviders.Serilog);
+                        .AddSagas(typeof(ReservationSaga))
+                        .UseLibLog(LibLogProviders.Serilog);
                 });
 
             var databaseReadContext = ApiReadContextFactory.Create(apiReadModelConnectionString);
