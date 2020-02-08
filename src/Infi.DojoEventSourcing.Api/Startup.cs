@@ -15,6 +15,7 @@ using Infi.DojoEventSourcing.Domain.Reservations.Commands;
 using Infi.DojoEventSourcing.Domain.Reservations.Events;
 using Infi.DojoEventSourcing.Domain.Reservations.Queries;
 using Infi.DojoEventSourcing.Domain.Reservations.Sagas;
+using Infi.DojoEventSourcing.Domain.Rooms.Events;
 using Infi.DojoEventSourcing.Domain.Rooms.Queries;
 using Infi.DojoEventSourcing.ReadModels.Api;
 using Infi.DojoEventSourcing.ReadModels.Api.DAL;
@@ -50,6 +51,7 @@ namespace DojoEventSourcing
             services.AddControllers();
 
             services.AddSingleton(new OfferReadModelLocator()); // FIXME ED Used this to fix a DI issue
+            services.AddSingleton(new RoomOccupationReadModelLocator()); // FIXME ED Used this to fix a DI issue
 
             services.AddEventFlow(
                 cfg =>
@@ -81,7 +83,7 @@ namespace DojoEventSourcing
                         .UseSQLiteReadModel<RoomReadModel>()
                         .UseSQLiteReadModel<ReservationReadModel>()
                         .UseSQLiteReadModel<OfferReadModel, OfferReadModelLocator>()
-                        .UseSQLiteReadModel<RoomOccupationReadModel>()
+                        .UseSQLiteReadModel<RoomOccupationReadModel, RoomOccupationReadModelLocator>()
                         .AddQueryHandlers(typeof(GetAllReservationsHandler).Assembly)
                         .AddSagaLocators(typeof(ReservationSagaLocator))
                         .AddSagas(typeof(ReservationSaga))
