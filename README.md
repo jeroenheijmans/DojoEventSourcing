@@ -57,8 +57,6 @@ EventFlow is a CQRS + EventSourcing framework that can use a variety of event st
 3. Follow the `room.Create` call into the Room aggregate, you'll see there's a `RoomCreated` event emitted here. Typically this is the place where you'd first do some validation. Emitting the event won't be committed to the event store yet. This will only happen once the calling command handler end with a succesful result.
 4. Open the `RoomCreated` event. This class corresponds with the data that we found in the EventStore GUI.
 
-## Getting familiar with the application
-This application is a simple booking system for a Hotel. In this step we'll explain the booking flow, so you can start with the real assignements afterwards.
 1. As you've seen you can create rooms. These are of course required in order to make any reservations
 2. You start a new reservation by calling `[GET]  http://localhost:5000/Reservation/New`. This won't do anything except returning a newly generated `reservationId` that you can use in subsequent calls.
 3. Call `[GET] http://localhost:5000/Reservation/Offers?reservationId=<guid>&&arrival=YYYY-MM-dd&departure=YYYY-MM-dd` to get a priceoffer for the requested period. This will generate a price offer event for each day in that period. You can locate it in the ES GUI. The offer will be valid for 30 minutes.
@@ -74,4 +72,45 @@ This application is a simple booking system for a Hotel. In this step we'll expl
 }
 ```
 This will generate some more events that you can explore.
-5. TODO !!!!!! Something about the room saga here? 
+
+## Assignments
+The following assignments will show you some key EventSourcing and EventFlow aspects. We advise you not to put too much effort in the details. Focus on getting familiar with the different concepts.
+
+### 1. Add a dinner option to our reservation
+We'd like to offer our customers a dinner at our hotel restaurant. The customers can choose to opt-in on the dinner deal, after thair reservation is confirmed. 
+
+**Acceptance criteria**
+* There's an api endpoint to opt in for the dinner deal
+* Customers shouldn't be able to opt-in more than once
+* The opt-in should be stored in EventStoe
+* The readmodel should be updated accordingly
+
+### 2. Send a confirmaton e-mail
+We'd like to send a confirmation e-mail to the customer when the reservation is succesfully placed.
+
+**Acceptance criteria**
+* An e-mail is send as soon as a reservation is completed, a.k.a. when a room is assigned to the reservation. Logging the recipient (name + email) with some dummy text will be sufficient for this exercise.
+* Don't query the readmodel for this.
+
+### 3. Upgrade existing events
+We got some complaints from the PR-department that we send e-mails to customers with their full name. Apparently it's policy to address them only by their first name, whenever possible. So we need to split the name field into two separate first name and last name fields.
+
+As you might have seen, the customer details are stored in the `ContactInformationUpdated` event on the reservation aggregate. We could simply change this event by adding the new fields, but this would create a problem for all the existing events in the store. If we change the properties in this event, we won't be able to parse all previous events back to the new event.
+
+This is a very important part of event sourcing. You should be able to parse every event stream at all times. It's ok to change events due to new insights, but you must provide a way to parse to old events. Remember that we need all the past events to determine the current state of an aggregate. 
+
+Fortunately EventFlow provides a way to deal with this. We'll be using [event upgraders](https://eventflow.readthedocs.io/EventUpgrade.html). We'll keep the first version of the `ContactInformationUpdated` in our code base. Rename it to `ContactInformationUpdatedV1`, and  create a new class `ContactInformationUpdated` to represent our current idea on the `ContactInformationUpdated` event. Write an upgrader which can transform a version 1 event to a version 2 event.
+
+**Acceptance criteria**
+* `[POST] /Reservation` requires first and last name instead of only name
+* `[POST] /Reservation/UpdateContactInformation` requires first and last name instead of only name
+* New fields get stored in EventFlow
+* Existing reservations can still be hydrated
+** You can test it by calling `[POST] /Reservation/UpdateContactInformation` on an existing reservation. 
+* Update the readmodel to the new situation.
+* The e-mail only uses the customers first name.
+
+### 4. Rebuilding the readmodel database
+
+
+
