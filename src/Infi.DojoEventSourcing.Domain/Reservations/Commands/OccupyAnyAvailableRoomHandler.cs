@@ -29,9 +29,7 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Commands
         {
             try
             {
-                var anyAvailableRoom =
-                    await GetAnyAvailableRoom(command.Start, command.End, cancellationToken)
-                        .ConfigureAwait(false);
+                var anyAvailableRoom = await GetAnyAvailableRoom(command.Start, command.End, cancellationToken);
 
                 reservation.RequestOccupyRoom(anyAvailableRoom.RoomId, command.Start, command.End);
 
@@ -53,10 +51,9 @@ namespace Infi.DojoEventSourcing.Domain.Reservations.Commands
             CancellationToken cancellationToken)
         {
             var rooms =
-                await _queryProcessor
-                    .ProcessAsync(new GetAvailabilityByTimeRange(start, end), cancellationToken)
-                    .ConfigureAwait(false);
+                await _queryProcessor.ProcessAsync(new GetAvailabilityByDateRange(start, end), cancellationToken);
 
+            rooms.Find(room => room.IsAvailable);
             if (!rooms.Any(room => room.IsAvailable))
             {
                 throw new NoRoomsAvailableException($"No rooms available for {start} - {end}");
