@@ -51,7 +51,7 @@ You'll see the dashboard, which shows some technical information and the current
 Refresh the Stream Browser in the ES GUI, and you'll see a newly created Room stream. Click on it to see all the events that belong to that stream. You'll see one event: `RoomCreated`. If you expand it, you'll see the data for that event in json format. Each room will have it's own event stream and all events for that specific room will be collected in its event stream. So when we make a reservation that occupies this room, a `RoomOccupied` event will be stored in this stream.
 
 ## Getting familiar with EventFlow
-EventFlow is a CQRS + EventSourcing framework that can use a variety of event stores (e.g. EventStore) and read stores (e.g. Sqlite). It makes it easy to manage aggregates, apply events  them and maintain different event versions. The best way to understand the basics, is to walk through the code that created our first room.
+EventFlow is a CQRS + EventSourcing framework that can use a variety of event stores (e.g. EventStore) and read stores (e.g. Sqlite). It makes it easy to manage aggregates, apply events to them and maintain different event versions. The best way to understand the basics, is to walk through the code that created our first room.
 1. Open the `RoomController` and go to the `CreateRoom` method.
    We use the EF `CommandBus` to publish a `CreateRoom` _command_ with a newly generated room command.
    If this command succeeds, we return the id, otherwise something went wrong and we return a BadRequest
