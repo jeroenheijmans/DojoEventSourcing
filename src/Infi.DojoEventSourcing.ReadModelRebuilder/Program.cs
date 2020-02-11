@@ -22,7 +22,7 @@ namespace ReadModelRebuilder
     {
         private static readonly IConfigurationRoot Configuration = ConfigurationFactory.Create();
 
-        static async Task Main(string[] args)
+        public static async Task Main()
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
@@ -32,7 +32,7 @@ namespace ReadModelRebuilder
             var serviceProvider = SetupDependencyInjection();
             var readModelRebuilder = serviceProvider.GetService<ReadmodelRebuildService>();
 
-            await readModelRebuilder.RebuildAllReadModels(CancellationToken.None);
+            await readModelRebuilder.RebuildAllReadModel<ReservationReadModel>(CancellationToken.None);
         }
 
         private static IServiceProvider SetupDependencyInjection()
@@ -40,7 +40,8 @@ namespace ReadModelRebuilder
             var services = new ServiceCollection();
 
             services.AddEventFlow(o => o
-                .UseEventStoreEventStore(new Uri(Configuration["EventStore:ConnectionString"]),
+                .UseEventStoreEventStore(
+                    new Uri(Configuration["EventStore:ConnectionString"]),
                     ConnectionSettings.Default)
                 .AddEvents(typeof(ReservationCreated).Assembly)
                 .ConfigureSQLite(

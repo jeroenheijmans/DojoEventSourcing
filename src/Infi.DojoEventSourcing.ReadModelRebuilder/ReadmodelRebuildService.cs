@@ -23,16 +23,15 @@ namespace ReadModelRebuilder
         {
             _readModelPopulator = readModelPopulator;
             _eventDefinitionService = eventDefinitionService;
+
+            RegisterAllEvents();
         }
 
-        public async Task RebuildAllReadModels(CancellationToken cancellationToken)
+        public async Task RebuildAllReadModel<T>(CancellationToken cancellationToken)
+            where T : class, IReadModel
         {
-            // FIXME BS This is a bug in EventFlow
-            RegisterAllEvents();
-
-            // TODO BS Rebuild all read models
-            await _readModelPopulator.PurgeAsync(typeof(ReservationReadModel), cancellationToken);
-            await _readModelPopulator.PopulateAsync(typeof(ReservationReadModel), cancellationToken);
+            await _readModelPopulator.PurgeAsync<T>(cancellationToken);
+            await _readModelPopulator.PopulateAsync<T>(cancellationToken);
         }
 
         private void RegisterAllEvents()
@@ -42,6 +41,7 @@ namespace ReadModelRebuilder
                 .GetTypes()
                 .Where(t => IsAssignableToGenericType(t, typeof(IAggregateEvent<,>)))
                 .ToImmutableList();
+
             _eventDefinitionService.Load(aggregateEventTypes);
         }
 

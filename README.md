@@ -135,7 +135,20 @@ We could use a subscriber here again. But another way is using a _process manage
 * Use the `ReservationSaga`
 
 ### Rebuilding the readmodel database
-TODO!!
+When you store everything as an event, you can still produce the current state of properties you weren't interested in at first. So if you shape your events well, you can answer any question regarding the data. Even for past comitted data. This is different from convential databses, because you can only retrieve the current state. You can read more about the business value of an event log [here](https://eventstore.com/docs/event-sourcing-basics/business-value-of-the-event-log/index.html).
+
+For this assignment we'll be making a simple adjustment to our existing `ReservationReadModel`. We're intrested in the total costs of each stay. We can calculate this by taking the sum of `OfferPrice` in all the `LineItemCreated` events. We've already setup a `ReadModelRebuilder` application, which you can use to rebuild the redamodel for al previous made reservations.
+
+**Acceptance criteria**
+* Extend the `ReservationReadModel` with a `TotalPrice` column
+* Make sure the `TotalPrice` is calculated from now on
+* Rebuild the `ReservationReadModel`, so the `TotalPrice` gets calculated for existing reservations
+
+n.b. Make sure you made a few reservations before you make any adjustments to the `ReservationReadModel` in order to see the effects of rebuilding properly.
+
+Can you think of more use cases that require readmodel rebuilds?
+- Maybe we can find out if there's a correlation between the duration of a stay and opting in for the dinner deal?
+- How does the amount of generated offers relate to the total costs of a reservation?
 
 ### How to deal with GDPR
 In event sourcing it's not really possible to delete certain events. So whatever you put on the event stream will basically stay there forever. That means that we have to think very carefully about what we store in the event store, and how to deal with "forget me" requests from customers.
