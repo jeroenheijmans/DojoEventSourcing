@@ -17,11 +17,9 @@ This application is largely inspired by: https://github.com/luontola/cqrs-hotel
     * `Infi.DojoEventSourcing.Api`
     * `Infi.DojoEventSourcing.ReadModelDbMigrator`
 2. We'll be working with [EventStore](https://eventstore.com/). You'll need an instance to write our events to. Choose one of the following options:
-    * The easiest way to do this is running `docker-compose up` from the root directory in this repository. 
-    * You can also manually install EventStore by following the instuctions [here](https://eventstore.com/docs/getting-started/?tabs=tabid-3%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-4).
-    * We also provide a shared instance. Ask us for the credentials. This is less ideal, because you'll see the events of other participants mixed up with yours.
-
-EventStores comes with a GUI, which can be found at http://localhost:2113. You can login with the default username _admin_  and password _changeit_
+    * OR: Run `docker-compose up` from the root directory in this repository. 
+    * OR: Install EventStore manually by following the instuctions [here](https://eventstore.com/docs/getting-started/?tabs=tabid-3%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-4).
+EventStore comes with a GUI, which can be found at http://localhost:2113. You can login with the default username _admin_  and password _changeit_
 3. Once you have an EventStore instance running, you must provide the connection credentials in the `Infi.DojoEventSourcing.Api/appsettings.json`. If you've used the default settings, you're ok already.
 4. Besides EventStore we'll also need a database for our read models. In this exercise we'll use SQLite.
     * Create a `readmodel.db` file somewhere
