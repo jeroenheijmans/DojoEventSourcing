@@ -19,7 +19,7 @@ This application is largely inspired by: https://github.com/luontola/cqrs-hotel
 2. We'll be working with [EventStore](https://eventstore.com/). You'll need an instance to write our events to. Choose one of the following options:
     * OR: Run `docker-compose up` from the root directory in this repository.
     * OR: Install EventStore manually by following the instuctions [here](https://eventstore.com/docs/getting-started/).
-3. Make sure you start EventStore with projections enabled -- this requires adding one or two command line parameters when starting the instance. This is described [here](https://eventstore.com/docs/getting-started/projections/), under _Setting up projections_.
+3. Make sure you start EventStore with projections enabled -- **for all non-Docker-installations**, this requires adding one or two command line parameters when starting the instance. This is described [here](https://eventstore.com/docs/getting-started/projections/), under _Setting up projections_.
 EventStore comes with a GUI, which can be found at http://localhost:2113. You can login with the default username _admin_  and password _changeit_
 4. Once you have an EventStore instance running, you must provide the connection credentials in the `Infi.DojoEventSourcing.Api/appsettings.json`. If you've used the default settings, you're ok already.
 5. Besides EventStore we'll also need a database for our read models. In this exercise we'll use SQLite.
