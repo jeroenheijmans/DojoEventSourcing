@@ -3,14 +3,17 @@ This dojo is targeted at people that are somewhat experienced in C#, and have so
 
 We've made a basic assignment for you that implements a simple Hotel booking system. You'll learn to think in terms of events instead of state. This assignment uses [EventStore](https://eventstore.com/) as a datastore for events. We also use the [EventFlow](https://github.com/eventflow/EventFlow) framework.
 
-**Requirements**
-* dotnet core 3.0
+## Acknowledgements
+This application is largely inspired by: https://github.com/luontola/cqrs-hotel
 
-**Some useful EventSourcing articles**
+## Background and useful articles on EventSourcing
 * https://dev.to/barryosull/event-sourcing-what-it-is-and-why-its-awesome
 * https://arkwright.github.io/event-sourcing.html
 
-This application is largely inspired by: https://github.com/luontola/cqrs-hotel
+## Requirements
+- dotnet core 3.0
+- docker
+- optional: docker-compose
 
 ## Getting started
 1. Create the `appsettings.json` files by copying the `appsettings.Example.json` files in 
