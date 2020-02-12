@@ -44,7 +44,7 @@ You can find Postman collection and environment files in the `postman` folder in
     * If the _Projections_ menu link is grayed out, your EventStore instance needs to be restarted with projections. See step 3 of Getting started :point_up:.
 4. Now it's time to create our first stream. Make sure you started the `Infi.DojoEventSourcing.Api` and make the following call 
 ```
-[POST] http://localhost:5000/Room/CreateRoom
+[POST] http://localhost:5000/Room
 {
    "Number": "1"
 }
