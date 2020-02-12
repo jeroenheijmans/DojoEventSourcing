@@ -34,8 +34,7 @@ n.b. To use the api something like [Postman](https://www.postman.com/) could com
 You can find Postman collection and environment files in the `postman` folder in the root of this repository.
 
 ## Getting familiar with EventStore
-1. Go to the EventStore GUI http://localhost:2113
-You'll see the dashboard, which shows some technical information and the current open connections.
+1. Go to the EventStore GUI http://localhost:2113, where you can login with username _admin_ and password _changeit_. You'll see the dashboard, which shows some technical information and the current open connections.
 2. Go to the Stream Browser page. You won't see much here yet, but this will be your main entry point to peek inside the EventStore.
     * If the _Stream Browser_ menu link is grayed out, your EventStore instance needs to be restarted with projections. See step 3 of Getting started :point_up:.
 3. Go to the Projections page. In order to browse streams, we first need to enable the `$streams` projection, by clicking on `$streams` and then on `start` in the right corner.
