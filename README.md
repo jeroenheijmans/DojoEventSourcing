@@ -93,7 +93,7 @@ We'd like to offer our customers a dinner at our hotel restaurant. The customers
 * The reservation readmodel should be updated accordingly
 
 ### 2. Subscribe to events
-If a customer wants to dine at our restaurant, we'd better give the chefs a heads-up so they can a buy enough supplies.
+If a customer wants to dine at our restaurant, we'd better give the chefs a heads-up so they can buy enough supplies.
 
 EventFlow offers async and sync subscribers, which you can use to _do_ something once an event has happend. Synchronous subscribers are blocking and commandbus execution will wait until all sync subscribers are done. Async subscribers will not wait.
 
